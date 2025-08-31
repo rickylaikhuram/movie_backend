@@ -74,7 +74,7 @@ export const isUser = (req: AuthRequest, res: Response, next: NextFunction) => {
 };
 
 // user signup input validation
-export const signUpInputValidationMiddleware = (
+export const signUpInputValidation = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -92,7 +92,7 @@ export const signUpInputValidationMiddleware = (
 };
 
 // user signin input validation
-export const signInInputValidationMiddleware = (
+export const signInInputValidation = (
   req: AuthRequest,
   res: Response,
   next: NextFunction

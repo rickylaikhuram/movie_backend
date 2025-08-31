@@ -1,24 +1,9 @@
 // server/routes/authRoutes.ts
 import { Router } from "express";
-// import {
-//   userSignInInputValidationMiddleware,
-//   userSignupInputValidationMiddleware,
-//   validateOtpInput,
-//   validatePhone,
-// } from "../middlewares/validate.middlewares";
-// import {
-//   handleUserSignUpVerify,
-//   handleResendSignupOtp,
-//   handleVerifiedUserSignup,
-//   handleUserSignin,
-//   handleOtpSigninInitiate,
-//   handleUserSigninWithOtp,
-//   logoutUser,
-// } from "../controllers/auth.controller";
 import {
   identifySessionUser,
-  signInInputValidationMiddleware,
-  signUpInputValidationMiddleware,
+  signInInputValidation,
+  signUpInputValidation,
 } from "../middlewares/auth/auth.middlewares.js";
 import {
   handleSignIn,
@@ -37,7 +22,7 @@ router.get("/me", identifySessionUser, responseUser);
 router.post(
   "/signup",
   identifySessionUser,
-  signUpInputValidationMiddleware,
+  signUpInputValidation,
   handleSignUp
 );
 
@@ -47,28 +32,8 @@ router.post(
 router.post(
   "/signin/password",
   identifySessionUser,
-  signInInputValidationMiddleware,
+  signInInputValidation,
   handleSignIn
 );
-
-// // OTP sign-in: Step 1 - Send OTP
-// router.post(
-//   "/signin/otp/initiate",
-//   identifySessionUser,
-//   validatePhone,
-//   handleOtpSigninInitiate
-// );
-
-// // OTP sign-in: Step 2 - Verify OTP
-// router.post(
-//   "/signin/otp/verify",
-//   identifySessionUser,
-//   validateOtpInput,
-//   handleUserSigninWithOtp
-// );
-
-// /* -------------------- LOGOUT -------------------- */
-
-// router.post("/logout", logoutUser);
 
 export default router;

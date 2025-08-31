@@ -1,13 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
-
 
 datasource db {
   provider = "postgresql"
@@ -28,20 +21,30 @@ model User {
 }
 
 model Movies {
-  id            String      @id @default(uuid())
-  name          String
-  description   String
-  title         String
-  genre         String
-  releaseYear   String
-  director      String
-  cast          String[]
-  synopsis      String
-  posterUrl     String
-  averageRating String
-  createdAt     DateTime    @default(now())
-  reviews       Review[]
-  WatchList     WatchList[]
+  id          String   @id @default(uuid())
+  tmdbId      Int? // optional, only if fetched from TMDB
+  title       String
+  synopsis    String
+  genres      String[] // multiple genres
+  releaseYear String?
+  runtime     Int?
+  language    String?
+  country     String?
+
+  director String?
+  cast     String[]
+
+  posterUrl   String? 
+  backdropUrl String? // optional background
+  trailerUrl  String? // YouTube or uploaded link
+
+  averageRating Float? // numeric rating
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews   Review[]
+  watchList WatchList[]
 }
 
 model WatchList {

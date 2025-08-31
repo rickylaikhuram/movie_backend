@@ -18,3 +18,23 @@ export const signIn = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
+
+export const movieSchema = z.object({
+  tmdbId: z.number().nullable().optional(),
+  title: z.string().min(1, "Title is required"),
+  synopsis: z.string().min(10, "Synopsis should be at least 10 characters"),
+  genres: z.array(z.string()).nonempty("At least one genre is required"),
+  releaseYear: z
+    .string()
+    .regex(/^\d{4}$/, "Release year must be a 4-digit year"),
+  runtime: z.number().positive("Runtime must be positive"),
+  language: z.string(),
+  country: z.string(),
+
+  director: z.string().optional(),
+  cast: z.array(z.string()).optional(),
+
+  posterUrl: z.url("Poster URL must be valid").optional(),
+  backdropUrl: z.url("Backdrop URL must be valid").optional(),
+  trailerUrl: z.url("Trailer URL must be valid").optional(),
+});
