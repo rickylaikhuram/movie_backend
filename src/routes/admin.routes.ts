@@ -5,7 +5,10 @@ import {
 } from "../middlewares/auth/auth.middlewares.js";
 import { movieInputValidation } from "../middlewares/admin/admin.middlewares.js";
 import {
+  getAllUser,
+  getUserDetails,
   handleAddMovie,
+  handleDeleteMovie,
   handleUpdateMovie,
 } from "../controllers/admin.controller.js";
 
@@ -27,7 +30,10 @@ router.put(
   handleUpdateMovie
 );
 
-router.delete("/movies/:id", identifySessionUser, isAdmin,
-    
-);
+router.delete("/movies/:id", identifySessionUser, isAdmin, handleDeleteMovie);
+
+router.get("/user", identifySessionUser, isAdmin, getAllUser);
+router.get("/user/:userId", identifySessionUser, isAdmin, getUserDetails);
+
+
 export default router;

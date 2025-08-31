@@ -1,6 +1,7 @@
 import type { Response } from "express";
 import type { AuthRequest } from "../types/request.types.js";
 import prisma from "../config/prisma.js";
+import { getUserById } from "../services/user.services.js";
 
 // add movie
 export const handleAddMovie = async (req: AuthRequest, res: Response) => {
@@ -101,6 +102,45 @@ export const handleDeleteMovie = async (req: AuthRequest, res: Response) => {
       throw {
         status: 404,
         message: "Movie not found",
+      };
+    }
+    throw error;
+  }
+};
+
+// get all user
+export const getAllUser = async (req: AuthRequest, res: Response) => {
+  const allUsers = await prisma.user.findMany({});
+  res.status(200).json({
+    message: "Fetched all user successfully",
+    user: allUsers,
+  });
+};
+
+// get user details
+export const getUserDetails = async (req: AuthRequest, res: Response) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    throw {
+      status: 403,
+      message: "Need User ID",
+    };
+  }
+
+  try {
+    const userData = await getUserById(userId);
+
+    res.status(200).json({
+      message: "Fetched user details successfully",
+      user: userData,
+    });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      // Prisma Record not found error
+      throw {
+        status: 404,
+        message: "User not found",
       };
     }
     throw error;
