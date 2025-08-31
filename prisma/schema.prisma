@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  password   String
+  salt       String
+  profileUrl String
+  isAdmin    Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  watchList  WatchList[]
+  review     Review[]
+}
+
+model Movies {
+  id            String      @id @default(uuid())
+  name          String
+  description   String
+  title         String
+  genre         String
+  releaseYear   String
+  director      String
+  cast          String[]
+  synopsis      String
+  posterUrl     String
+  averageRating String
+  createdAt     DateTime    @default(now())
+  reviews       Review[]
+  WatchList     WatchList[]
+}
+
+model WatchList {
+  id       String   @id @default(uuid())
+  userId   String
+  moviesId String
+  addedAt  DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movies Movies @relation(fields: [moviesId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moviesId])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  moviesId   String
+  rating     RATING
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  reviewText String
+
+  // Relations
+  user   User?   @relation(fields: [userId], references: [id])
+  Movies Movies? @relation(fields: [moviesId], references: [id])
+
+  @@index([userId])
+  @@index([moviesId])
+}
+
+enum RATING {
+  ZERO
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+}
