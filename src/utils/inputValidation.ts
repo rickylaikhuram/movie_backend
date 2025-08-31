@@ -38,3 +38,20 @@ export const movieSchema = z.object({
   backdropUrl: z.url("Backdrop URL must be valid").optional(),
   trailerUrl: z.url("Trailer URL must be valid").optional(),
 });
+
+export const RatingEnum = z.enum([
+  "ZERO",
+  "ONE",
+  "TWO",
+  "THREE",
+  "FOUR",
+  "FIVE",
+]);
+
+// Review schema
+export const reviewSchema = z.object({
+  userId: z.uuid(),
+  moviesId: z.uuid(),
+  rating: RatingEnum.default("ZERO"),
+  reviewText: z.string().min(1, "Review text cannot be empty"),
+});

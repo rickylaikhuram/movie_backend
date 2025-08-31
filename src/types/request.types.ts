@@ -1,5 +1,12 @@
 import type { Request } from "express";
-import type { User } from "@prisma/client";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  profileUrl: string;
+  createdAt: Date;
+}
 
 export interface DecodedToken {
   uid: string;
@@ -9,12 +16,8 @@ export interface DecodedToken {
   exp?: number;
 }
 
-export interface UserExtend extends Request {
-  user?: User;
-}
-
 export interface AuthRequest extends Request {
   user?: DecodedToken;
   userData?: User;
-  token?:string
+  token?: string;
 }

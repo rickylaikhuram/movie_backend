@@ -34,7 +34,7 @@ model Movies {
   director String?
   cast     String[]
 
-  posterUrl   String? 
+  posterUrl   String?
   backdropUrl String? // optional background
   trailerUrl  String? // YouTube or uploaded link
 
@@ -63,7 +63,7 @@ model Review {
   id         String   @id @default(uuid())
   userId     String
   moviesId   String
-  rating     RATING
+  rating     RATING   @default(ZERO)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   reviewText String

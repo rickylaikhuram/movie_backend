@@ -13,3 +13,37 @@ export async function getUserById(userId: string) {
     },
   });
 }
+export async function getReviewsByUserId(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      review: {
+        select: {
+          moviesId: true,
+          rating: true,
+          reviewText: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getWatchListByUserId(userId: string) {
+  return prisma.watchList.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      movies: {
+        select: {
+          id: true,
+          title: true,
+          synopsis: true,
+          genres: true,
+          releaseYear: true,
+          posterUrl: true,
+        },
+      },
+    },
+  });
+}
