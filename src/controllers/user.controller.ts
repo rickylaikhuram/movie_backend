@@ -7,38 +7,7 @@ import {
   getWatchListByUserId,
 } from "../services/user.services.js";
 import { success } from "zod";
-
-// check if user exists by UID in token
-export const queryExistingUserCheck = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const uid = req.user?.uid;
-
-    if (!uid) {
-      const error = new Error("Unauthorized") as any;
-      error.statusCode = 401;
-      throw error;
-    }
-
-    const user = await getUserById(uid);
-
-    if (!user) {
-      const error = new Error("User does not exist or is deleted") as any;
-      error.statusCode = 401;
-      throw error;
-    }
-
-    // Optional: attach full user to request
-    req.userData = user;
-
-    next();
-  } catch (err) {
-    next(err);
-  }
-};
+import { AppError } from "../utils/error.class.js";
 
 // get existing user
 export const getUserProfile = async (
@@ -50,18 +19,12 @@ export const getUserProfile = async (
     const uid = req.user?.uid;
 
     if (!uid) {
-      throw {
-        status: 400,
-        message: "Uid is required",
-      };
+      throw new AppError(400, "Uid is required");
     }
 
     const user = await getUserById(uid);
     if (!user) {
-      throw {
-        status: 404,
-        message: "User not found",
-      };
+      throw new AppError(404, "User not found");
     }
 
     res.status(200).json({
@@ -83,18 +46,12 @@ export const updateUserName = async (
     const { name } = req.body;
 
     if (!name || typeof name !== "string" || name.trim().length < 3) {
-      throw {
-        status: 400,
-        message: "Invalid name",
-      };
+      throw new AppError(400, "Invalid name");
     }
 
     const uid = req.user?.uid;
     if (!uid) {
-      throw {
-        status: 401,
-        message: "Unauthorized",
-      };
+      throw new AppError(401, "Unauthorized");
     }
 
     const updatedUser = await prisma.user.update({
@@ -126,17 +83,11 @@ export const createReview = async (
     const reviewData = req.body.reviewData;
     const movieId = req.params.movieId;
     if (!movieId) {
-      throw {
-        status: 403,
-        message: "Need Movie ID",
-      };
+      throw new AppError(403, "Need Movie ID");
     }
     const uid = req.user?.uid;
     if (!uid) {
-      throw {
-        status: 401,
-        message: "Unauthorized",
-      };
+      throw new AppError(401, "Unauthorized");
     }
 
     const createdReview = await prisma.review.create({
@@ -166,10 +117,7 @@ export const getReview = async (
   try {
     const uid = req.user?.uid;
     if (!uid) {
-      throw {
-        status: 401,
-        message: "Unauthorized",
-      };
+      throw new AppError(401, "Unauthorized");
     }
 
     const review = await getReviewsByUserId(uid);
@@ -192,16 +140,10 @@ export const createWatchlist = async (
     const movieId = req.params.movieId;
     const uid = req.user?.uid;
     if (!movieId) {
-      throw {
-        status: 403,
-        message: "Need Movie ID",
-      };
+      throw new AppError(403, "Need Movie ID");
     }
     if (!uid) {
-      throw {
-        status: 401,
-        message: "Unauthorized",
-      };
+      throw new AppError(401, "Unauthorized");
     }
 
     const createdWatchList = await prisma.watchList.create({
@@ -218,10 +160,7 @@ export const createWatchlist = async (
   } catch (err: any) {
     if (err.code === "P2002") {
       // Prisma unique constraint violation
-      throw {
-        status: 409,
-        message: "This movie is already in your watchlist",
-      };
+      throw new AppError(409, "This movie is already in your watchlist");
     }
     next(err);
   }
@@ -236,10 +175,7 @@ export const getWatchlist = async (
   try {
     const uid = req.user?.uid;
     if (!uid) {
-      throw {
-        status: 401,
-        message: "Unauthorized",
-      };
+      throw new AppError(401, "Unauthorized");
     }
 
     const watchList = await getWatchListByUserId(uid);
@@ -260,17 +196,11 @@ export const deleteWatchlist = async (
 ) => {
   const watchListId = req.params.watchListId;
   if (!watchListId) {
-    throw {
-      status: 403,
-      message: "Need WatchList ID",
-    };
+    throw new AppError(403, "Need WatchList ID");
   }
   const uid = req.user?.uid;
   if (!uid) {
-    throw {
-      status: 401,
-      message: "Unauthorized",
-    };
+    throw new AppError(401, "Unauthorized");
   }
 
   try {
@@ -288,11 +218,8 @@ export const deleteWatchlist = async (
   } catch (error: any) {
     if (error.code === "P2025") {
       // Prisma Record not found error
-      throw {
-        status: 404,
-        message: "WatchList not found",
-      };
+      throw new AppError(404, "WatchList not found");
     }
-    throw error;
+    next(error);
   }
 };

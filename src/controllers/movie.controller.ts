@@ -1,11 +1,13 @@
 import type { Response } from "express";
 import prisma from "../config/prisma.js";
 import type { AuthRequest } from "../types/request.types.js";
+import { AppError } from "../utils/error.class.js";
 
 // get all movies
 export const getAllMovies = async (req: AuthRequest, res: Response) => {
   const movies = await prisma.movies.findMany({
     select: {
+      id:true,
       title: true,
       genres: true,
       releaseYear: true,
@@ -24,10 +26,7 @@ export const getAllMovies = async (req: AuthRequest, res: Response) => {
 export const getMovie = async (req: AuthRequest, res: Response) => {
   const moviesId = req.params.id;
   if (!moviesId) {
-    throw {
-      status: 403,
-      message: "Need Movie ID",
-    };
+    throw new AppError(403, "Need Movie ID");
   }
   const movies = await prisma.movies.findUnique({
     where: { id: moviesId },
@@ -45,10 +44,7 @@ export const getMovie = async (req: AuthRequest, res: Response) => {
   });
 
   if (!movies) {
-    throw {
-      status: 404,
-      message: "Movie not found",
-    };
+    throw new AppError(404, "Movie not found");
   }
 
   res.status(200).json({
@@ -62,10 +58,7 @@ export const getMovieReview = async (req: AuthRequest, res: Response) => {
   const moviesId = req.params.id;
 
   if (!moviesId) {
-    throw {
-      status: 403,
-      message: "Need Movie ID",
-    };
+    throw new AppError(403, "Need Movie ID");
   }
 
   const page = Number(req.query.page) || 1; // page number, default 1
@@ -89,10 +82,7 @@ export const getMovieReview = async (req: AuthRequest, res: Response) => {
   });
 
   if (!movies) {
-    throw {
-      status: 404,
-      message: "Movie not found",
-    };
+    throw new AppError(404, "Movie not found");
   }
 
   res.status(200).json({

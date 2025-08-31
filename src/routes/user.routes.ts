@@ -10,7 +10,6 @@ import {
   getReview,
   getUserProfile,
   getWatchlist,
-  queryExistingUserCheck,
   updateUserName,
 } from "../controllers/user.controller.js";
 import { reviewInputValidation } from "../middlewares/user/user.middleware.js";
@@ -22,7 +21,6 @@ router.get(
   "/:id",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   getUserProfile
 );
 
@@ -31,7 +29,6 @@ router.put(
   "/:id",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   updateUserName
 );
 
@@ -40,7 +37,6 @@ router.post(
   "/movies/:movieId/reviews",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   reviewInputValidation,
   createReview
 );
@@ -50,7 +46,6 @@ router.get(
   "/movies/:movieId/reviews",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   getReview
 );
 
@@ -59,7 +54,6 @@ router.post(
   "/watchlist/:movieId",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   createWatchlist
 );
 
@@ -68,7 +62,6 @@ router.get(
   "/watchlist",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   getWatchlist
 );
 
@@ -77,7 +70,6 @@ router.delete(
   "/watchlist/:watchListId",
   identifySessionUser,
   isUser,
-  queryExistingUserCheck,
   deleteWatchlist
 );
 

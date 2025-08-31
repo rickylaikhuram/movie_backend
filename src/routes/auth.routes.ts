@@ -30,7 +30,7 @@ router.post(
 
 // Password-based sign-in
 router.post(
-  "/signin/password",
+  "/signin",
   identifySessionUser,
   signInInputValidation,
   handleSignIn

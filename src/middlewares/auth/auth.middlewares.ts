@@ -5,6 +5,7 @@ import { decodeToken, verifyToken } from "../../utils/tokens.js";
 import { createGuestTokens } from "../../utils/guest.js";
 import { signIn, signUp } from "../../utils/inputValidation.js";
 import { z } from "zod";
+import { AppError } from "../../utils/error.class.js";
 
 dotenv.config();
 
@@ -36,14 +37,14 @@ export const identifySessionUser = async (
         guestDecoded = decodeToken(guestToken);
       } catch (decodeErr) {
         console.error("Failed to decode new guest token:", decodeErr);
-        throw { statusCode: 500, message: "Internal server error" };
+        throw new AppError(500, "Internal server error");
       }
       req.user = guestDecoded;
       req.token = guestToken; // Store the new guest token
       return next();
     } catch (guestErr) {
       console.error("Guest token creation failed:", guestErr);
-      throw { statusCode: 500, message: "Internal server error" };
+      throw new AppError(500, "Internal server error");
     }
   }
 };
@@ -55,7 +56,7 @@ export const isAdmin = (
   next: NextFunction
 ) => {
   if (!req.user || !req.user.isAdmin) {
-    throw { statusCode: 403, message: "Admin access only" };
+    throw new AppError(403, "Admin access only");
   }
   next();
 };
@@ -63,11 +64,11 @@ export const isAdmin = (
 //check if the user is a user
 export const isUser = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) {
-    throw { statusCode: 401, message: "Unauthorized" };
+    throw new AppError(403, "Unauthorized");
   }
 
   if (req.user.role !== "user") {
-    throw { statusCode: 403, message: "Only user access allowed" };
+    throw new AppError(403, "Only user access allowed");
   }
 
   next();
@@ -81,11 +82,12 @@ export const signUpInputValidation = (
 ) => {
   const result = signUp.safeParse(req.body.signUpData);
   if (!result.success) {
-    throw {
-      statusCode: 411,
-      message: "Invalid input format",
-      errors: z.treeifyError(result.error),
-    };
+    throw new AppError(
+      411, // HTTP status
+      "Invalid input format",
+      "INVALID_INPUT", // optional error code
+      z.treeifyError(result.error) // details
+    );
   }
   req.body.signUpData = result.data;
   next();
@@ -99,11 +101,12 @@ export const signInInputValidation = (
 ) => {
   const result = signIn.safeParse(req.body.signInData);
   if (!result.success) {
-    throw {
-      statusCode: 411,
-      message: "Invalid input format",
-      errors: z.treeifyError(result.error),
-    };
+    throw new AppError(
+      411, // HTTP status
+      "Invalid input format",
+      "INVALID_INPUT", // optional error code
+      z.treeifyError(result.error) // details
+    );
   }
   next();
 };

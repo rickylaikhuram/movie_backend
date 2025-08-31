@@ -3,6 +3,7 @@ import type { AuthRequest } from "../types/request.types.js";
 import prisma from "../config/prisma.js";
 import { comparePassword, generateSalt, hashPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/tokens.js";
+import { AppError } from "../utils/error.class.js";
 
 // response the decoded jwt everytime with token
 export const responseUser = (req: AuthRequest, res: Response) => {
@@ -15,21 +16,28 @@ export const responseUser = (req: AuthRequest, res: Response) => {
 // sign up user
 export const handleSignUp = async (req: AuthRequest, res: Response) => {
   const { name, email, password, profileUrl } = req.body.signUpData;
+
+  const normalizedEmail =
+    typeof email === "string" ? email.toLowerCase() : email;
+
   const userExist = await prisma.user.findUnique({
     where: {
-      email,
+      email: normalizedEmail,
     },
   });
   if (userExist) {
-    throw {
-      statusCode: 409,
-      message: "User Email Already Exist",
-    };
+    throw new AppError(409, "User Email Already Exist");
   }
   const salt = await generateSalt(10);
   const hashedPassword = await hashPassword(password!, salt);
   const user = await prisma.user.create({
-    data: { email, name, password: hashedPassword, salt, profileUrl },
+    data: {
+      email: normalizedEmail,
+      name,
+      password: hashedPassword,
+      salt,
+      profileUrl,
+    },
   });
   const token = generateToken(
     {
@@ -49,23 +57,20 @@ export const handleSignUp = async (req: AuthRequest, res: Response) => {
 // sign in user
 export const handleSignIn = async (req: AuthRequest, res: Response) => {
   const { email, password } = req.body.signInData;
+  const normalizedEmail =
+    typeof email === "string" ? email.toLowerCase() : email;
+
   const userExist = await prisma.user.findUnique({
     where: {
-      email,
+      email: normalizedEmail,
     },
   });
   if (!userExist) {
-    throw {
-      statusCode: 404,
-      message: "User not found",
-    };
+    throw new AppError(404, "User not found");
   }
   const isPasswordCorrect = await comparePassword(password, userExist.password);
   if (!isPasswordCorrect) {
-    throw {
-      statusCode: 401,
-      message: "Unauthorized: Incorrect password",
-    };
+    throw new AppError(401, "Unauthorized: Incorrect password");
   }
 
   const token = generateToken(

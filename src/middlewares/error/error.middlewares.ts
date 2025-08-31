@@ -40,6 +40,7 @@ export const errorHandler = (
     success: false,
     errorCode: err.errorCode || undefined, // send only if present
     message: err.message || "Internal Server Error",
+    details: err.details || undefined,
   });
   return;
 };

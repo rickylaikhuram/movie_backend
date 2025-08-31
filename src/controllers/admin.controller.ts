@@ -1,7 +1,8 @@
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "../types/request.types.js";
 import prisma from "../config/prisma.js";
 import { getUserById } from "../services/user.services.js";
+import { AppError } from "../utils/error.class.js";
 
 // add movie
 export const handleAddMovie = async (req: AuthRequest, res: Response) => {
@@ -21,10 +22,7 @@ export const handleAddMovie = async (req: AuthRequest, res: Response) => {
   });
 
   if (existingMovie) {
-    throw {
-      statusCode: 409,
-      message: "Movie already exists",
-    };
+    throw new AppError(409, "Movie already exists");
   }
 
   // Create new movie
@@ -42,10 +40,7 @@ export const handleAddMovie = async (req: AuthRequest, res: Response) => {
 export const handleUpdateMovie = async (req: AuthRequest, res: Response) => {
   const moviesId = req.params.id;
   if (!moviesId) {
-    throw {
-      status: 403,
-      message: "Need Movie ID",
-    };
+    throw new AppError(403, "Need Movie ID");
   }
   // `movieData` is already validated by middleware
   const movieData = req.body.movieData;
@@ -58,10 +53,7 @@ export const handleUpdateMovie = async (req: AuthRequest, res: Response) => {
   });
 
   if (!existingMovie) {
-    throw {
-      statusCode: 400,
-      message: "Movie not found",
-    };
+    throw new AppError(400, "Movie not found");
   }
 
   // Update movie
@@ -77,14 +69,15 @@ export const handleUpdateMovie = async (req: AuthRequest, res: Response) => {
 };
 
 // delete movie
-export const handleDeleteMovie = async (req: AuthRequest, res: Response) => {
+export const handleDeleteMovie = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const moviesId = req.params.id;
 
   if (!moviesId) {
-    throw {
-      status: 403,
-      message: "Need Movie ID",
-    };
+    throw new AppError(403, "Need Movie ID");
   }
 
   try {
@@ -99,12 +92,9 @@ export const handleDeleteMovie = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     if (error.code === "P2025") {
       // Prisma Record not found error
-      throw {
-        status: 404,
-        message: "Movie not found",
-      };
+      throw new AppError(404, "Movie not found");
     }
-    throw error;
+    next(error);
   }
 };
 
@@ -118,14 +108,15 @@ export const getAllUser = async (req: AuthRequest, res: Response) => {
 };
 
 // get user details
-export const getUserDetails = async (req: AuthRequest, res: Response) => {
+export const getUserDetails = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const userId = req.params.userId;
 
   if (!userId) {
-    throw {
-      status: 403,
-      message: "Need User ID",
-    };
+    throw new AppError(403, "Need User ID");
   }
 
   try {
@@ -138,11 +129,8 @@ export const getUserDetails = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     if (error.code === "P2025") {
       // Prisma Record not found error
-      throw {
-        status: 404,
-        message: "User not found",
-      };
+      throw new AppError(404, "User not found");
     }
-    throw error;
+    next(error);
   }
 };
