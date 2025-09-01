@@ -34,8 +34,8 @@ router.post(
   createReview
 );
 
-// get all reviews
-router.get("/movies/:movieId/reviews", identifySessionUser, isUser, getReview);
+// get specific movie reviews
+router.get("/reviews", identifySessionUser, isUser, getReview);
 
 // create watchlist
 router.post(
@@ -47,6 +47,7 @@ router.post(
 
 // get watchlist
 router.get("/watchlist", identifySessionUser, isUser, getWatchlist);
+
 // get watchlist
 router.get("/watchlist/ids", identifySessionUser, isUser, getWatchlistIds);
 

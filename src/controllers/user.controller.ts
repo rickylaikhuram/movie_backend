@@ -7,6 +7,7 @@ import {
   getWatchListByUserId,
 } from "../services/user.services.js";
 import { AppError } from "../utils/error.class.js";
+import { ratingMap } from "../types/user.types.js";
 
 // get existing user
 export const getUserProfile = async (
@@ -81,14 +82,17 @@ export const createReview = async (
   try {
     const reviewData = req.body.reviewData;
     const movieId = req.params.movieId;
+
     if (!movieId) {
       throw new AppError(403, "Need Movie ID");
     }
+
     const uid = req.user?.uid;
     if (!uid) {
       throw new AppError(401, "Unauthorized");
     }
 
+    // Create review
     const createdReview = await prisma.review.create({
       data: {
         userId: uid,
@@ -98,16 +102,38 @@ export const createReview = async (
       },
     });
 
+    // Fetch all reviews for this movie
+    const allReviews = await prisma.review.findMany({
+      where: { moviesId: movieId },
+      select: { rating: true },
+    });
+
+    // Convert ratings to numbers
+    const numericRatings = allReviews.map(
+      (r) => ratingMap[r.rating.toLowerCase()] ?? 0
+    );
+
+    // Reduce with initial value = 0
+    const sum = numericRatings.reduce((acc, val) => acc + val, 0);
+    const avg = numericRatings.length > 0 ? sum / numericRatings.length : 0;
+
+    // Update movie with new average rating
+    await prisma.movies.update({
+      where: { id: movieId },
+      data: { averageRating: avg },
+    });
+
     res.status(200).json({
-      message: "Review Created successfully",
+      message: "Review created successfully",
       review: createdReview,
+      newAverageRating: avg,
     });
   } catch (err) {
     next(err);
   }
 };
 
-// get all reviews
+// get user reviews
 export const getReview = async (
   req: AuthRequest,
   res: Response,
@@ -197,6 +223,7 @@ export const getWatchlist = async (
     next(err);
   }
 };
+
 // get watchlist ids
 export const getWatchlistIds = async (
   req: AuthRequest,

@@ -30,8 +30,8 @@ export async function getReviewsByUserId(userId: string) {
 }
 
 export async function getWatchListByUserId(userId: string) {
-  return prisma.watchList.findUnique({
-    where: { id: userId },
+  return prisma.watchList.findMany({
+    where: { userId },
     select: {
       id: true,
       movies: {
@@ -40,6 +40,7 @@ export async function getWatchListByUserId(userId: string) {
           title: true,
           synopsis: true,
           genres: true,
+          director:true,
           releaseYear: true,
           posterUrl: true,
         },
