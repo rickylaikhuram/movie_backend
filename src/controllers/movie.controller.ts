@@ -7,7 +7,7 @@ import { AppError } from "../utils/error.class.js";
 export const getAllMovies = async (req: AuthRequest, res: Response) => {
   const movies = await prisma.movies.findMany({
     select: {
-      id:true,
+      id: true,
       title: true,
       genres: true,
       releaseYear: true,
@@ -39,6 +39,11 @@ export const getMovie = async (req: AuthRequest, res: Response) => {
       averageRating: true,
       cast: true,
       synopsis: true,
+      runtime: true,
+      language: true,
+      country: true,
+      backdropUrl: true,
+      trailerUrl: true,
       createdAt: true,
     },
   });

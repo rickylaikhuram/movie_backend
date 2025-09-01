@@ -50,8 +50,6 @@ export const RatingEnum = z.enum([
 
 // Review schema
 export const reviewSchema = z.object({
-  userId: z.uuid(),
-  moviesId: z.uuid(),
   rating: RatingEnum.default("ZERO"),
   reviewText: z.string().min(1, "Review text cannot be empty"),
 });

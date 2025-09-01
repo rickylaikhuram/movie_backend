@@ -6,7 +6,6 @@ import {
   getUserById,
   getWatchListByUserId,
 } from "../services/user.services.js";
-import { success } from "zod";
 import { AppError } from "../utils/error.class.js";
 
 // get existing user
@@ -131,37 +130,48 @@ export const getReview = async (
 };
 
 // create watchlist
-export const createWatchlist = async (
+export const handleToggleWatchlist = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const movieId = req.params.movieId;
+    const { moviesId } = req.params;
     const uid = req.user?.uid;
-    if (!movieId) {
-      throw new AppError(403, "Need Movie ID");
-    }
+
     if (!uid) {
       throw new AppError(401, "Unauthorized");
     }
-
-    const createdWatchList = await prisma.watchList.create({
-      data: {
-        userId: uid,
-        moviesId: movieId,
-      },
-    });
-
-    res.status(200).json({
-      message: "watchList Created successfully",
-      watchList: createdWatchList,
-    });
-  } catch (err: any) {
-    if (err.code === "P2002") {
-      // Prisma unique constraint violation
-      throw new AppError(409, "This movie is already in your watchlist");
+    if (!moviesId) {
+      throw new AppError(403, "Need Movie ID");
     }
+
+    const existing = await prisma.watchList.findFirst({
+      where: { userId: uid, moviesId },
+    });
+
+    if (existing) {
+      // Remove from wishlist
+      await prisma.watchList.delete({
+        where: { id: existing.id },
+      });
+
+      res
+        .status(200)
+        .json({ message: "Removed from watchlist", removed: true });
+      return;
+    } else {
+      // Add to wishlist
+      const watchlist = await prisma.watchList.create({
+        data: { userId: uid, moviesId },
+      });
+
+      res
+        .status(200)
+        .json({ message: "Added to Watchlist", watchlist, removed: false });
+      return;
+    }
+  } catch (err) {
     next(err);
   }
 };
@@ -187,39 +197,24 @@ export const getWatchlist = async (
     next(err);
   }
 };
-
-// delete watchlist
-export const deleteWatchlist = async (
+// get watchlist ids
+export const getWatchlistIds = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const watchListId = req.params.watchListId;
-  if (!watchListId) {
-    throw new AppError(403, "Need WatchList ID");
-  }
-  const uid = req.user?.uid;
-  if (!uid) {
-    throw new AppError(401, "Unauthorized");
-  }
-
   try {
-    const deletedWatchList = await prisma.watchList.delete({
-      where: {
-        id: watchListId,
-        userId: uid,
-      },
+    const uid = req.user!.uid;
+
+    const items = await prisma.watchList.findMany({
+      where: { userId: uid },
+      select: { moviesId: true },
     });
 
-    res.status(200).json({
-      message: "WatchList deleted successfully",
-      watchList: deletedWatchList,
-    });
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      // Prisma Record not found error
-      throw new AppError(404, "WatchList not found");
-    }
+    const watchListIds = items.map((item) => item.moviesId);
+
+    res.status(200).json({ watchListIds });
+  } catch (error) {
     next(error);
   }
 };

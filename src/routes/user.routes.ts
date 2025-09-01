@@ -5,11 +5,11 @@ import {
 } from "../middlewares/auth/auth.middlewares.js";
 import {
   createReview,
-  createWatchlist,
-  deleteWatchlist,
   getReview,
   getUserProfile,
   getWatchlist,
+  getWatchlistIds,
+  handleToggleWatchlist,
   updateUserName,
 } from "../controllers/user.controller.js";
 import { reviewInputValidation } from "../middlewares/user/user.middleware.js";
@@ -17,20 +17,13 @@ import { reviewInputValidation } from "../middlewares/user/user.middleware.js";
 const router = Router();
 
 // get users data
-router.get(
-  "/:id",
-  identifySessionUser,
-  isUser,
-  getUserProfile
-);
+router.get("/", identifySessionUser, isUser, getUserProfile);
 
-// update users data
-router.put(
-  "/:id",
-  identifySessionUser,
-  isUser,
-  updateUserName
-);
+// update users name
+router.patch("/name/:id", identifySessionUser, isUser, updateUserName);
+
+// update users email
+router.patch("/email/:id", identifySessionUser, isUser, updateUserName);
 
 // create reviews
 router.post(
@@ -42,35 +35,19 @@ router.post(
 );
 
 // get all reviews
-router.get(
-  "/movies/:movieId/reviews",
-  identifySessionUser,
-  isUser,
-  getReview
-);
+router.get("/movies/:movieId/reviews", identifySessionUser, isUser, getReview);
 
 // create watchlist
 router.post(
-  "/watchlist/:movieId",
+  "/watchlist/toggle/:moviesId",
   identifySessionUser,
   isUser,
-  createWatchlist
+  handleToggleWatchlist
 );
 
 // get watchlist
-router.get(
-  "/watchlist",
-  identifySessionUser,
-  isUser,
-  getWatchlist
-);
-
-// delete watchlist
-router.delete(
-  "/watchlist/:watchListId",
-  identifySessionUser,
-  isUser,
-  deleteWatchlist
-);
+router.get("/watchlist", identifySessionUser, isUser, getWatchlist);
+// get watchlist
+router.get("/watchlist/ids", identifySessionUser, isUser, getWatchlistIds);
 
 export default router;
