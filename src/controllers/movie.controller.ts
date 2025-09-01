@@ -2,6 +2,7 @@ import type { Response } from "express";
 import prisma from "../config/prisma.js";
 import type { AuthRequest } from "../types/request.types.js";
 import { AppError } from "../utils/error.class.js";
+import { tr } from "zod/locales";
 
 // get all movies
 export const getAllMovies = async (req: AuthRequest, res: Response) => {
@@ -147,6 +148,16 @@ export const getMovieReview = async (req: AuthRequest, res: Response) => {
         orderBy: {
           createdAt: "desc",
         },
+        select: {
+          reviewText: true,
+          rating: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
       },
       _count: {
         select: { reviews: true },
@@ -161,12 +172,9 @@ export const getMovieReview = async (req: AuthRequest, res: Response) => {
   res.status(200).json({
     message: "Fetched reviews successfully",
     reviews: movies.reviews,
-    pagination: {
-      total: movies._count.reviews,
-      page,
-      limit,
-      totalPages: Math.ceil(movies._count.reviews / limit),
-      hasMore: page * limit < movies._count.reviews,
-    },
+    page,
+    totalReviews: movies._count.reviews,
+    totalPages: Math.ceil(movies._count.reviews / limit),
+    limit,
   });
 };

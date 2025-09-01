@@ -8,6 +8,8 @@ import {
 } from "../services/user.services.js";
 import { AppError } from "../utils/error.class.js";
 import { ratingMap } from "../types/user.types.js";
+import { emailSchema } from "../utils/inputValidation.js";
+import z from "zod";
 
 // get existing user
 export const getUserProfile = async (
@@ -66,6 +68,51 @@ export const updateUserName = async (
 
     res.status(200).json({
       message: "Name changed successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// update userEmail
+export const updateUserEmail = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new AppError(400, "Need Email");
+    }
+    const result = emailSchema.safeParse(email);
+    if (!result.success) {
+      throw new AppError(
+        411, // HTTP status
+        "Invalid email format",
+        "INVALID_EMAIL_FORMAT", // optional error code
+        z.treeifyError(result.error) // details
+      );
+    }
+    const uid = req.user?.uid;
+    if (!uid) {
+      throw new AppError(401, "Unauthorized");
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: uid },
+      data: { email: result.data },
+      select: {
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "Email changed successfully",
       user: updatedUser,
     });
   } catch (err) {

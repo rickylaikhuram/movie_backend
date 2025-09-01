@@ -16,7 +16,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch src --exec node --loader ts-node/esm src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx prisma generate && tsc",
+    "start": "npx prisma db push && node dist/index.js",
+    "db:seed": "npx prisma db seed",
+    "db:reset": "npx prisma migrate reset && npx prisma db seed",
+    "postinstall": "npx prisma generate"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

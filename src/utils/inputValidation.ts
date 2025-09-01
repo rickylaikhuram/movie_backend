@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const emailSchema = z.email({ message: "Invalid email address format" });
+export const emailSchema = z.email({ message: "Invalid email address format" });
 
 const passwordSchema = z
   .string()

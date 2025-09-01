@@ -18,11 +18,18 @@ export async function getReviewsByUserId(userId: string) {
     where: { id: userId },
     select: {
       id: true,
+      name: true,
       review: {
         select: {
-          moviesId: true,
+          Movies: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
           rating: true,
           reviewText: true,
+          createdAt: true,
         },
       },
     },
@@ -40,7 +47,7 @@ export async function getWatchListByUserId(userId: string) {
           title: true,
           synopsis: true,
           genres: true,
-          director:true,
+          director: true,
           releaseYear: true,
           posterUrl: true,
         },
